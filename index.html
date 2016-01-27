@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Foundation | Welcome</title>
+    <title>ML by HS</title>
     <link rel="stylesheet" href="http://dhbhdrzi4tiry.cloudfront.net/cdn/sites/foundation.min.css">
 </head>
 <body>
@@ -11,17 +11,17 @@
 <div class="top-bar">
     <div class="top-bar-left">
         <ul class="menu">
-            <li class="menu-text">Yeti Agency</li>
+            <li class="menu-text">Hans Salomonsson</li>
         </ul>
     </div>
-    <div class="top-bar-right">
-        <ul class="menu">
-            <li><a href="#">One</a></li>
-            <li><a href="#">Two</a></li>
-            <li><a href="#">Three</a></li>
-            <li><a href="#">Four</a></li>
-        </ul>
-    </div>
+    <!--<div class="top-bar-right">-->
+    <!--<ul class="menu">-->
+    <!--<li><a href="#">One</a></li>-->
+    <!--<li><a href="#">Two</a></li>-->
+    <!--<li><a href="#">Three</a></li>-->
+    <!--<li><a href="#">Four</a></li>-->
+    <!--</ul>-->
+    <!--</div>-->
 </div>
 
 <div class="callout large primary">
@@ -32,15 +32,16 @@
 <div class="row" id="content">
     <div class="medium-8 columns">
         <div class="blog-post">
-            <h3>Deep Learning with Google's TensorFlow
+            <h2>Deep Learning with Google's TensorFlow
                 <small>26/1/2016</small>
-            </h3>
-            <a href="http://www.tensorflow.org">
-                <img class="thumbnail"
+            </h2>
+            <a href="http://www.tensorflow.org" style="text-align: center; display: block;">
+                <img width="300"
                      src="https://1.bp.blogspot.com/-gANdrsx2ceo/VkAzFQYZ8HI/AAAAAAAARXo/r25jef0dij4/s1600/2FNLTensorFlow.png">
             </a>
             <p>
-                Google open sourced their machine intelligence library <a href="http://www.tensorflow.org">TensorFlow</a>
+                Google open sourced their machine intelligence library <a
+                    href="http://www.tensorflow.org">TensorFlow</a>
                 the 1st of November 2015. The primary use case for the library is deep learning, but it can also be used
                 more generally as a distributed mathematical library, e.g. solving partial differential equations.
                 I recently worked on a research project where I implemented a sequence model for a traditional NLP task
@@ -48,12 +49,78 @@
                 working with a high level tool like TensorFlow for doing deep learning.
             </p>
             <p>
-                The core of the library is implemented in C++, but you write your application in Python. Programming
-                wise it is a different to normal programming since you design your computational graph of nodes that 
-                will be run later.
+                Tensorflow's core is implemented in C++ and CUDA C, but you write your application in Python. Programming
+                wise it is a bit different to normal programming since you design your computational graph of nodes that
+                will be run later, e.g a mix of imperative and symbolic programming. Below is an
+                image of a one hidden layer feed forward neural network on the MNIST
+                digit recognition data. I will not go into details how to use tensorflow but rather share my experience
+                using it. For those interested in learning tensorflow have a look at the excellent official
+                <a href="https://www.tensorflow.org/versions/0.6.0/tutorials/index.html">tutorials</a>.
             </p>
 
-            <img src="http://www.tensorflow.org/images/tensors_flowing.gif" alt="Tensors Flowing">
+            <!--<div>-->
+            <img style="margin: 0 auto; display: block;"
+                 src="http://www.tensorflow.org/images/tensors_flowing.gif" alt="Tensors Flowing">
+            <!--</div>-->
+
+            <h4 style="color: green;">The Advantages</h4>
+            <p>
+                To me there are three major advantages.
+            </p>
+
+            <h5>Productivity</h5>
+            <p>
+            I had three weeks from start to finished article. I had no prior experience with TensorFlow. It took me
+            two weeks to implement a new state-of-the-art model, which is not very much time. Especially considering
+            that first week was basically just to learn the library. I would estimate that it would take me 2-3x times
+            longer to implement the final model in C++. However, the biggest gain in productivity was the flexibility.
+            E.g. to make the training of the the initial state to the LSTM cell configurable I only needed to
+            add
+            <pre><code>init_state = tf.Variable([...]) if train_init_state else tf.zeros([...])</code></pre>
+            </p>
+            But what about the gradients? You need not to worry about that, since your computational graph uses 
+            automatic differentiation (basically the chain rule on the composed function that is your graph). This 
+            feature is great, but nothing new, see <a href="http://deeplearning.net/software/theano/">theano</a>.
+
+            <h5>Distributes in a cluster with(out) GPUs</h5>
+            <p>
+                The benefit of not coding towards a specific hardware configuration is tremendous. TensorFlow will
+                use the resources you have. If it is not fast enough, get another gpu or add another node and run
+                again without changing your code.
+            </p>
+
+            <h5>Easy to use in production</h5>
+            <p>
+                Tensorflow is excellent for research with its flexibility, but it's also excellent for production.
+                When you are happy with your model you can export the C++ code for the model and use on any device
+                with a C++ compiler and call it from any language that can call C/C++ functions.
+            </p>
+
+            <h4 style="color:red;">The Disadvantages</h4>
+            <p>... and two disadvantages, of which one is hopefully temporarily.</p>
+
+            <h5>Immature Release</h5>
+            <p>
+                The open source release is quite immature. A lot of operations don't have a cuda implementation,
+                it's currently not distributed (official reason is that it is entangled with internal apis, but will
+                be released soon) and the performance are/were not as good as its competitors.
+            </p>
+
+            <h5>Once the graph is created there is not much flexibility left</h5>
+            <p>
+                When the graph is constructed you are supposed to execute it, not change it. This means that there is
+                no way of deferring decisions with conditionals and loops, e.g. I had a lot of issues with variable
+                length sequences. You can partly mitigate the problem by doing bucketing of sentences of similar lengths.
+            </p>
+
+            <h4>Conclusion</h4>
+            <p>
+                I very much believe that the future of tools for computationally expensive program is to analyze high level
+                programs and distribute it for you on the available accelerators and nodes. The question is if it will
+                be TensorFlow or any other similar tool (<a href="https://github.com/dmlc/mxnet">mxnet</a>).
+                At the moment TensorFlow has great traction, the github repo is quite active and Google has put a lot of
+                effort into to library and the open source launch.
+            </p>
 
             <div class="callout">
                 <ul class="menu simple">
@@ -63,24 +130,24 @@
             </div>
         </div>
     </div>
-    <div class="medium-3 columns" data-sticky-container>
-        <div class="sticky" data-sticky data-anchor="content">
-            <h4>Categories</h4>
-            <ul>
-                <li><a href="#">Skyler</a></li>
-                <li><a href="#">Jesse</a></li>
-                <li><a href="#">Mike</a></li>
-                <li><a href="#">Holly</a></li>
-            </ul>
-            <h4>Authors</h4>
-            <ul>
-                <li><a href="#">Skyler</a></li>
-                <li><a href="#">Jesse</a></li>
-                <li><a href="#">Mike</a></li>
-                <li><a href="#">Holly</a></li>
-            </ul>
-        </div>
-    </div>
+    <!--<div class="medium-3 columns" data-sticky-container>-->
+    <!--<div class="sticky" data-sticky data-anchor="content">-->
+    <!--<h4>Categories</h4>-->
+    <!--<ul>-->
+    <!--<li><a href="#">Skyler</a></li>-->
+    <!--<li><a href="#">Jesse</a></li>-->
+    <!--<li><a href="#">Mike</a></li>-->
+    <!--<li><a href="#">Holly</a></li>-->
+    <!--</ul>-->
+    <!--<h4>Authors</h4>-->
+    <!--<ul>-->
+    <!--<li><a href="#">Skyler</a></li>-->
+    <!--<li><a href="#">Jesse</a></li>-->
+    <!--<li><a href="#">Mike</a></li>-->
+    <!--<li><a href="#">Holly</a></li>-->
+    <!--</ul>-->
+    <!--</div>-->
+    <!--</div>-->
 </div>
 <div class="row column">
     <ul class="pagination" role="navigation" aria-label="Pagination">
@@ -99,6 +166,8 @@
 <script src="http://dhbhdrzi4tiry.cloudfront.net/cdn/sites/foundation.js"></script>
 <script>
       $(document).foundation();
+
+
 
 
 </script>
